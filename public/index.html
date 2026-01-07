@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ro">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LateNightBites | Mongo Remix</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <nav class="nav">
+        <div class="logo">LateNightBites</div>
+        <div class="badge">MongoDB live</div>
+      </nav>
+      <div class="hero-content">
+        <h1>Noaptea are gust. <span>Mongo are vibe.</span></h1>
+        <p>
+          Dashboard-ul tău cu personalitate pentru mini-proiectul Mongo. Date reale, interacțiuni
+          live, recomandări și un strop de magie nocturnă.
+        </p>
+        <div class="hero-actions">
+          <button class="btn primary" data-scroll="customers">Explorează clienții</button>
+          <button class="btn ghost" data-scroll="analytics">Vezi topurile</button>
+        </div>
+      </div>
+      <div class="hero-glow"></div>
+    </header>
+
+    <main>
+      <section id="customers" class="section">
+        <div class="section-header">
+          <div>
+            <h2>Clubul gurmanzilor nocturni</h2>
+            <p>Clienți reali din MongoDB, sortați după puncte de fidelitate.</p>
+          </div>
+          <div class="filters">
+            <input id="customer-search" type="search" placeholder="Caută după nume..." />
+            <label class="toggle">
+              <input id="filter-vegan" type="checkbox" />
+              <span>Vegan</span>
+            </label>
+            <label class="toggle">
+              <input id="filter-spicy" type="checkbox" />
+              <span>Spicy</span>
+            </label>
+          </div>
+        </div>
+        <div id="customers-grid" class="grid"></div>
+      </section>
+
+      <section id="restaurants" class="section accent">
+        <div class="section-header">
+          <div>
+            <h2>Restaurante deschise până târziu</h2>
+            <p>Alege vibe-ul culinar, filtrat după rating și stil.</p>
+          </div>
+          <div class="filters">
+            <input id="restaurant-search" type="search" placeholder="Caută restaurant..." />
+            <select id="cuisine-filter">
+              <option value="">Toate bucătăriile</option>
+            </select>
+            <label class="toggle">
+              <input id="filter-open" type="checkbox" />
+              <span>Doar open late</span>
+            </label>
+          </div>
+        </div>
+        <div id="restaurants-grid" class="grid"></div>
+      </section>
+
+      <section id="analytics" class="section">
+        <div class="section-header">
+          <div>
+            <h2>Topul nopții</h2>
+            <p>Agregarea ta MongoDB live: revenue per restaurant.</p>
+          </div>
+          <button class="btn ghost" id="refresh-analytics">Refresh</button>
+        </div>
+        <div id="analytics-list" class="list"></div>
+      </section>
+
+      <section id="orders" class="section accent">
+        <div class="section-header">
+          <div>
+            <h2>Comenzi în mișcare</h2>
+            <p>Feed live cu comenzi. Marchează rapid statusul.</p>
+          </div>
+          <button class="btn ghost" id="refresh-orders">Reîncarcă</button>
+        </div>
+        <div id="orders-list" class="list"></div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div>
+        <strong>LateNightBites</strong> — dashboard de noapte cu gust și date reale din MongoDB.
+      </div>
+      <span>Made with ☕ + 🌙</span>
+    </footer>
+
+    <template id="customer-card-template">
+      <article class="card">
+        <div class="card-header">
+          <div>
+            <h3 data-name></h3>
+            <p data-email></p>
+          </div>
+          <span class="pill" data-points></span>
+        </div>
+        <div class="card-tags" data-preferences></div>
+        <div class="card-actions">
+          <button class="btn tiny" data-action="points" data-delta="5">+5</button>
+          <button class="btn tiny" data-action="points" data-delta="20">+20</button>
+          <button class="btn tiny ghost" data-action="delete">Șterge</button>
+        </div>
+      </article>
+    </template>
+
+    <template id="restaurant-card-template">
+      <article class="card">
+        <div class="card-header">
+          <div>
+            <h3 data-name></h3>
+            <p data-cuisine></p>
+          </div>
+          <span class="pill" data-rating></span>
+        </div>
+        <div class="card-tags" data-meta></div>
+      </article>
+    </template>
+
+    <template id="analytics-item-template">
+      <div class="list-item">
+        <div>
+          <strong data-name></strong>
+          <p data-meta></p>
+        </div>
+        <div class="list-metrics">
+          <span data-revenue></span>
+          <span data-orders></span>
+        </div>
+      </div>
+    </template>
+
+    <template id="order-item-template">
+      <div class="list-item">
+        <div>
+          <strong data-title></strong>
+          <p data-meta></p>
+        </div>
+        <div class="list-metrics">
+          <span data-total></span>
+          <select data-status>
+            <option value="placed">placed</option>
+            <option value="prepping">prepping</option>
+            <option value="delivered">delivered</option>
+          </select>
+        </div>
+      </div>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>

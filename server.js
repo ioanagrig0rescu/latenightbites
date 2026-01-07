@@ -1,10 +1,12 @@
 const express = require("express");
+const path = require("path");
 const cors = require("cors");
 const { MongoClient, ObjectId } = require("mongodb");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(express.static("public"));
 
 // 1) pune aici URI-ul tau
 const MONGO_URI = "mongodb+srv://ioana:ioni@cluster0.ghgdp4h.mongodb.net/?retryWrites=true&w=majority";
@@ -28,7 +30,7 @@ async function connect() {
 }
 
 app.get("/", (req, res) => {
-  res.send("LateNightBites API is running");
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 /*
@@ -39,6 +41,19 @@ app.get("/customers", async (req, res) => {
   const data = await customers
     .find({}, { projection: { name: 1, email: 1, loyaltyPoints: 1, preferences: 1 } })
     .sort({ loyaltyPoints: -1 })
+    .toArray();
+
+  res.json(data);
+});
+
+/*
+  GET /restaurants
+  Returneaza restaurantele (read)
+*/
+app.get("/restaurants", async (req, res) => {
+  const data = await restaurants
+    .find({}, { projection: { name: 1, cuisine: 1, rating: 1, isOpenLate: 1 } })
+    .sort({ rating: -1 })
     .toArray();
 
   res.json(data);
@@ -107,6 +122,74 @@ app.post("/orders", async (req, res) => {
 
   const result = await orders.insertOne(doc);
   res.status(201).json({ insertedId: result.insertedId });
+});
+
+/*
+  GET /orders
+  Feed cu comenzi + date asociate
+*/
+app.get("/orders", async (req, res) => {
+  const data = await orders.aggregate([
+    {
+      $lookup: {
+        from: "customers",
+        localField: "customerId",
+        foreignField: "_id",
+        as: "customer"
+      }
+    },
+    { $unwind: "$customer" },
+    {
+      $lookup: {
+        from: "restaurants",
+        localField: "restaurantId",
+        foreignField: "_id",
+        as: "restaurant"
+      }
+    },
+    { $unwind: "$restaurant" },
+    {
+      $addFields: {
+        total: {
+          $sum: {
+            $map: {
+              input: "$items",
+              as: "i",
+              in: { $multiply: ["$$i.qty", "$$i.unitPrice"] }
+            }
+          }
+        }
+      }
+    },
+    {
+      $project: {
+        items: 1,
+        status: 1,
+        createdAt: 1,
+        total: 1,
+        customerName: "$customer.name",
+        restaurantName: "$restaurant.name"
+      }
+    },
+    { $sort: { createdAt: -1 } }
+  ]).toArray();
+
+  res.json(data);
+});
+
+/*
+  PATCH /orders/:id/status
+  Body: { status }
+*/
+app.patch("/orders/:id/status", async (req, res) => {
+  const status = req.body.status || "placed";
+
+  const result = await orders.updateOne(
+    { _id: new ObjectId(req.params.id) },
+    { $set: { status } }
+  );
+
+  res.json({ matched: result.matchedCount, modified: result.modifiedCount });
 });
 
 /*
